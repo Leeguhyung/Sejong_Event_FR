@@ -1,7 +1,29 @@
-* {
-  box-sizing: border-box;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 아이콘(color prop)처럼 tailwind 클래스를 쓸 수 없는 곳에서 참조하는
+     단일 소스 오브 트루스. tailwind.config.js의 colors와 값이 반드시 일치해야 함. */
+  --color-primary: #7C6FCD;
+  --color-primary-soft: #C5B8E8;
+  --color-primary-light: #F4F0FF;
+  --color-secondary: #42B58A;
+  --color-ink: #111827;
+  --color-ink-secondary: #6B7280;
+  --color-ink-muted: #9CA3AF;
+  --color-ink-label: #4B5563;
+  --color-danger: #EF4444;
 }
 
-body {
-  margin: 0;
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-white font-sans antialiased;
+  }
+  #root {
+    @apply min-h-svh;
+  }
 }
