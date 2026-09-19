@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { MobileLayout } from './components/layout/MobileLayout'
+import { FestivalGuard } from './components/layout/FestivalGuard'
 import Home from './pages/Home'
 import EventSelect from './pages/event/EventSelect'
 import FestivalHub from './pages/festival/FestivalHub'
@@ -19,7 +20,12 @@ export default function App() {
         <Route element={<MobileLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/event" element={<EventSelect />} />
-          <Route path="/festival" element={<FestivalHub />} />
+
+          {/* 축제 라우트 — 기간·인증 조건으로 가드 */}
+          <Route element={<FestivalGuard />}>
+            <Route path="/festival" element={<FestivalHub />} />
+          </Route>
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
