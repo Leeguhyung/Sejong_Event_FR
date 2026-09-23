@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import EventSelect from './pages/event/EventSelect'
 import EventCreate from './pages/event/EventCreate'
 import EventHub from './pages/event/EventHub'
+import EventTicket from './pages/event/Ticket'
 import FestivalHub from './pages/festival/FestivalHub'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/event" element={<EventSelect />} />
           <Route path="/event/create" element={<EventCreate />} />
           <Route path="/event/hub" element={<EventHub />} />
+          <Route path="/event/ticket" element={<EventTicket />} />
 
           {/* 축제 라우트 — 기간·인증 조건으로 가드 */}
           <Route element={<FestivalGuard />}>
