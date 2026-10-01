@@ -10,6 +10,7 @@ import EventTicket from './pages/event/Ticket'
 import StaffQR from './pages/event/StaffQR'
 import StudentScan from './pages/event/StudentScan'
 import ManualTicket from './pages/event/ManualTicket'
+import Lottery from './pages/event/Lottery'
 import FestivalHub from './pages/festival/FestivalHub'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/event/qr" element={<StaffQR />} />
           <Route path="/event/scan" element={<StudentScan />} />
           <Route path="/event/manual-ticket" element={<ManualTicket />} />
+          <Route path="/event/lottery" element={<Lottery />} />
 
           {/* 축제 라우트 — 기간·인증 조건으로 가드 */}
           <Route element={<FestivalGuard />}>

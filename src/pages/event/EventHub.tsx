@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChartBar, QrCode, CalendarCheck, CaretRight, Trash } from '@phosphor-icons/react'
+import { ChartBar, QrCode, CalendarCheck, Star, CaretRight, Trash } from '@phosphor-icons/react'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { LiveBadge } from '../../components/ui/LiveBadge'
 import { useAuthStore } from '../../store/authStore'
 import { useEventStore } from '../../store/eventStore'
 
-// 추첨 메뉴는 추첨 화면 구현과 함께 추가한다.
 const STAFF_MENUS = [
   {
     label: '행사 현황 대시보드',
@@ -25,6 +24,12 @@ const STAFF_MENUS = [
     desc: 'QR 미인식 학생 — 학번·이름 직접 입력',
     to: '/event/manual-ticket',
     icon: <CalendarCheck size={22} color="var(--color-primary)" />,
+  },
+  {
+    label: '추첨',
+    desc: '슬롯 롤링 추첨 시스템',
+    to: '/event/lottery',
+    icon: <Star size={22} color="var(--color-primary)" />,
   },
 ]
 
