@@ -61,17 +61,18 @@ export default function EventDashboard() {
     }
   }, [selectedEvent])
 
+  useEffect(() => {
+    if (!selectedEvent) navigate('/event', { replace: true })
+  }, [selectedEvent, navigate])
+
   // 백엔드 WebSocket 서버 안정화 전이라 우선 5초 폴링으로 갱신한다.
   // 서버 준비 시 useWebSocket(<행사 토픽>, onMessage) 구독으로 교체.
   useEffect(() => {
-    if (!selectedEvent) {
-      navigate('/event', { replace: true })
-      return
-    }
+    if (!selectedEvent) return
     fetchAttendance()
     const timer = setInterval(fetchAttendance, 5000)
     return () => clearInterval(timer)
-  }, [selectedEvent, fetchAttendance, navigate])
+  }, [selectedEvent, fetchAttendance])
 
   if (loading) {
     return (

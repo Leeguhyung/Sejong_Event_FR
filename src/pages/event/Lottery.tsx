@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Gift } from '@phosphor-icons/react'
+import { Gift, Confetti } from '@phosphor-icons/react'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { useEventStore } from '../../store/eventStore'
 import { api } from '../../lib/api'
@@ -115,6 +115,35 @@ export default function Lottery() {
           {rolling && <span className="text-primary font-bold">추첨 중...</span>}
           {winner && <span className="text-primary font-bold">{String(winner.ticketNumber).padStart(4, '0')} 당첨!</span>}
           {!rolling && !winner && <span>추첨 시작 버튼을 눌러주세요</span>}
+        </div>
+      </div>
+
+      {/* 당첨자 카드 */}
+      {winner && (
+        <div className="bg-primary-light rounded-2xl p-5 mb-4 animate-slide-up">
+          <div className="flex justify-center mb-3"><Confetti size={28} color="var(--color-primary)" /></div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-meta font-semibold text-ink-secondary tracking-wider">당첨자</span>
+            <span className="text-meta font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
+              번호 {String(winner.ticketNumber).padStart(4, '0')}
+            </span>
+          </div>
+          <div className="text-headline font-extrabold text-ink mb-0.5">{winner.name}</div>
+          <div className="text-label text-ink-secondary">
+            {winner.studentId} · {winner.department}
+          </div>
+        </div>
+      )}
+
+      {/* 통계 */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-card rounded-xl p-3 px-3.5">
+          <div className="text-meta text-ink-secondary mb-0.5">참여자</div>
+          <div className="text-lg font-bold text-ink">{participantCount !== null ? `${participantCount}명` : '—'}</div>
+        </div>
+        <div className="bg-card rounded-xl p-3 px-3.5">
+          <div className="text-meta text-ink-secondary mb-0.5">경품 수량</div>
+          <div className="text-lg font-bold text-ink">1개</div>
         </div>
       </div>
 
