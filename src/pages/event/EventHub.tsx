@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { QrCode, CalendarCheck, CaretRight, Trash } from '@phosphor-icons/react'
+import { ChartBar, QrCode, CalendarCheck, Star, CaretRight, Trash } from '@phosphor-icons/react'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { LiveBadge } from '../../components/ui/LiveBadge'
 import { useAuthStore } from '../../store/authStore'
 import { useEventStore } from '../../store/eventStore'
 
-// 3회차 시점 운영 메뉴 — QR 표출 / 수동 발급.
-// 현황 대시보드·추첨은 4회차(WebSocket 실시간 집계·추첨)에서 추가.
 const STAFF_MENUS = [
+  {
+    label: '행사 현황 대시보드',
+    desc: '입장자 수 · 정족수 · 실시간 로그',
+    to: '/event/dashboard',
+    icon: <ChartBar size={22} color="var(--color-primary)" weight="fill" />,
+  },
   {
     label: '운영진 QR 표출',
     desc: '학생이 스캔할 입장 QR 띄우기',
@@ -20,6 +24,12 @@ const STAFF_MENUS = [
     desc: 'QR 미인식 학생 — 학번·이름 직접 입력',
     to: '/event/manual-ticket',
     icon: <CalendarCheck size={22} color="var(--color-primary)" />,
+  },
+  {
+    label: '추첨',
+    desc: '슬롯 롤링 추첨 시스템',
+    to: '/event/lottery',
+    icon: <Star size={22} color="var(--color-primary)" />,
   },
 ]
 
