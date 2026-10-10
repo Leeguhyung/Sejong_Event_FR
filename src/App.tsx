@@ -12,6 +12,9 @@ import StudentScan from './pages/event/StudentScan'
 import ManualTicket from './pages/event/ManualTicket'
 import Lottery from './pages/event/Lottery'
 import FestivalHub from './pages/festival/FestivalHub'
+import BoothList from './pages/festival/BoothList'
+import BoothCreate from './pages/festival/BoothCreate'
+import BoothAdmin from './pages/festival/BoothAdmin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
 // 서비스는 세 갈래로 나뉜다:
@@ -42,6 +45,10 @@ export default function App() {
           {/* 축제 라우트 — 기간·인증 조건으로 가드 */}
           <Route element={<FestivalGuard />}>
             <Route path="/festival" element={<FestivalHub />} />
+            <Route path="/festival/booths" element={<BoothList />} />
+            <Route path="/festival/booths/create" element={<BoothCreate />} />
+            <Route path="/festival/booths/:id/edit" element={<BoothCreate />} />
+            <Route path="/festival/kiosk/:id/admin" element={<BoothAdmin />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
