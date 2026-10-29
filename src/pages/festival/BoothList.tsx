@@ -83,15 +83,16 @@ export default function BoothList() {
         </button>
       )}
 
-      {/* 부스 목록 — 혼잡도 색상 점 + 대기 인원. 부스 상세 화면은 6회차에서 추가. */}
+      {/* 부스 목록 — 혼잡도 색상 점 + 대기 인원, 탭하면 부스 상세로 */}
       <div className="flex flex-col gap-4">
         {filtered.map((booth) => {
           const level = getCongestionLevel(booth.waiting)
           const c = getCongestionColor(level)
           return (
-            <div
+            <button
               key={booth.id}
-              className="bg-card rounded-2xl px-4 py-3.5 flex items-center gap-4"
+              onClick={() => navigate(`/festival/booths/${booth.id}`)}
+              className="bg-card rounded-2xl px-4 py-3.5 flex items-center gap-4 text-left active:scale-[.99] transition-transform"
             >
               <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${booth.gradient} flex items-center justify-center text-[26px] flex-none`}>
                 {booth.emoji}
@@ -109,7 +110,7 @@ export default function BoothList() {
                 </div>
                 <span className="text-meta text-ink-muted">대기 중</span>
               </div>
-            </div>
+            </button>
           )
         })}
       </div>
