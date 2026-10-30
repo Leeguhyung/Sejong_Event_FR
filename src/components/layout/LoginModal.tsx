@@ -113,7 +113,7 @@ export function LoginModal({ onClose }: LoginModalProps) {
               className="w-full h-[52px] bg-card rounded-xl px-4 text-body text-ink outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary border border-border transition-shadow"
             />
           </div>
-          {error && <p className="text-xs text-danger -mt-1">{error}</p>}
+          {error && <p key={error} className="text-xs text-danger -mt-1 animate-shake">{error}</p>}
           <button
             type="submit"
             disabled={loading}
