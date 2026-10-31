@@ -15,6 +15,8 @@ import FestivalHub from './pages/festival/FestivalHub'
 import BoothList from './pages/festival/BoothList'
 import BoothCreate from './pages/festival/BoothCreate'
 import BoothAdmin from './pages/festival/BoothAdmin'
+import BoothDetail from './pages/festival/BoothDetail'
+import Kiosk from './pages/festival/Kiosk'
 import AdminDashboard from './pages/admin/AdminDashboard'
 
 // 서비스는 세 갈래로 나뉜다:
@@ -48,6 +50,8 @@ export default function App() {
             <Route path="/festival/booths" element={<BoothList />} />
             <Route path="/festival/booths/create" element={<BoothCreate />} />
             <Route path="/festival/booths/:id/edit" element={<BoothCreate />} />
+            <Route path="/festival/booths/:id" element={<BoothDetail />} />
+            <Route path="/festival/kiosk/:id" element={<Kiosk />} />
             <Route path="/festival/kiosk/:id/admin" element={<BoothAdmin />} />
           </Route>
 

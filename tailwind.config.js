@@ -78,6 +78,10 @@ export default {
           from: { transform: 'scale(0.94) translateY(20px)', opacity: '0' },
           to: { transform: 'scale(1) translateY(0)', opacity: '1' },
         },
+        fadeIn: {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
         shake: {
           '0%, 100%': { transform: 'translateX(0)' },
           '20%': { transform: 'translateX(-6px)' },
@@ -95,6 +99,8 @@ export default {
         'pop': 'pop 0.5s ease both',
         'slide-up': 'slideUp 0.3s ease both',
         'modal-in': 'modalIn 0.3s ease both',
+        'fade-in': 'fadeIn 0.25s ease both',
+        'shake': 'shake 0.4s ease both',
       },
     },
   },

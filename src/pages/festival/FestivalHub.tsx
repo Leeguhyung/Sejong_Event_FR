@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CaretRight, PencilSimple, Trash, Storefront, Lightbulb, Gauge } from '@phosphor-icons/react'
+import { CaretRight, PencilSimple, Trash, Storefront, Lightbulb, Gauge, ClipboardText } from '@phosphor-icons/react'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { LiveBadge } from '../../components/ui/LiveBadge'
 import { useAuthStore } from '../../store/authStore'
@@ -25,9 +25,9 @@ export default function FestivalHub() {
   const isRejected = myBooth?.status === 'rejected'
   const isApproved = myBooth?.status === 'approved'
 
-  // 부스 상세·웨이팅 키오스크 메뉴는 6회차 이후. 5회차는 운영자 화면(영업 상태·대기 관리)만.
   const boothMenus = isApproved && myBooth
     ? [
+        { label: '부스 상세', desc: '혼잡도 · 실시간 대기 · 내 순번 조회', to: `/festival/booths/${myBooth.id}`, icon: <ClipboardText size={22} color="#92400E" />, bg: '#FEF3C7' },
         { label: '부스 운영자 화면', desc: '영업 상태 토글 · 대기 손님 호출/취소', to: `/festival/kiosk/${myBooth.id}/admin`, icon: <Gauge size={22} color="#92400E" />, bg: '#FEF3C7' },
       ]
     : []
