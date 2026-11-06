@@ -147,7 +147,16 @@ export default function BoothList() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-body font-bold text-ink mb-0.5">{booth.name}</div>
-                <div className="text-label-sm text-ink-secondary flex items-center gap-1">{booth.category} · <MapPin size={11} color="var(--color-ink-secondary)" />{booth.location}</div>
+                <div className="text-label-sm text-ink-secondary flex items-center gap-1 min-w-0">
+                  {booth.category}
+                  {booth.location?.trim() && (
+                    <>
+                      {' · '}
+                      <MapPin size={11} color="var(--color-ink-secondary)" className="flex-none" />
+                      <span className="truncate">{booth.location}</span>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="flex flex-col items-end gap-1 flex-none">
                 <div className="flex items-center gap-2">

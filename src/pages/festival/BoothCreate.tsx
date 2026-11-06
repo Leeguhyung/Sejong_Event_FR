@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, Lightbulb, ClipboardText, HourglassMedium, X } from '@phosphor-icons/react'
+import { Check, Lightbulb, ClipboardText, HourglassMedium } from '@phosphor-icons/react'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { useAuthStore } from '../../store/authStore'
 import { useFestivalStore, type Booth } from '../../store/festivalStore'
 import { EMOJI_OPTIONS, BOOTH_CATEGORIES } from '../../data/constants'
 import { api } from '../../lib/api'
+import { joinMeta } from '../../types'
 import { Field, fieldInputClass } from '../../components/ui/Field'
 import { CampusMap, type CampusMapMarker } from '../../components/map/CampusMap'
 import { isInsideCampus } from '../../lib/campus'
@@ -40,7 +41,6 @@ export default function BoothCreate() {
       ? { lat: editTarget.latitude, lng: editTarget.longitude }
       : null,
   )
-  const hasSavedCoords = editTarget?.latitude != null && editTarget?.longitude != null
   const [coordsError, setCoordsError] = useState<string>()
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
   const [loading, setLoading] = useState(false)
@@ -64,19 +64,13 @@ export default function BoothCreate() {
     () => (coords ? [{ id: 'picked', position: coords, emoji: form.emoji, color: 'var(--color-primary)' }] : []),
     [coords, form.emoji],
   )
-  const coordsPayload = coords ? { latitude: coords.lat, longitude: coords.lng } : {}
-
-  function validate() {
-    const errs: typeof errors = {}
-    if (!form.name.trim()) errs.name = '부스명을 입력해주세요'
-    if (!form.location.trim()) errs.location = '위치를 입력해주세요'
-    return errs
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const errs = validate()
-    if (Object.keys(errs).length) { setErrors(errs); return }
+    const errs: typeof errors = {}
+    if (!form.name.trim()) errs.name = '부스명을 입력해주세요'
+    if (!coords) setCoordsError('지도에서 부스 위치를 선택해주세요')
+    if (Object.keys(errs).length || !coords) { setErrors(errs); return }
+    const coordsPayload = { latitude: coords.lat, longitude: coords.lng }
 
     setLoading(true)
     try {
@@ -89,7 +83,7 @@ export default function BoothCreate() {
           description: form.description.trim() || undefined,
           ...coordsPayload,
         })
-        setSaved({ ...editTarget, ...form })
+        setSaved({ ...editTarget, ...form, ...coordsPayload })
       } else {
         const res = await api.post('/booths', {
           name: form.name.trim(),
@@ -128,7 +122,7 @@ export default function BoothCreate() {
               <span className="text-3xl">{saved.emoji}</span>
               <div>
                 <div className="text-lg font-bold text-ink">{saved.name}</div>
-                <div className="text-label-sm text-ink-secondary">{saved.category} · {saved.location}</div>
+                <div className="text-label-sm text-ink-secondary">{joinMeta(saved.category, saved.location)}</div>
               </div>
             </div>
             {saved.description && (
@@ -163,7 +157,7 @@ export default function BoothCreate() {
             <span className="text-3xl">{saved.emoji}</span>
             <div>
               <div className="text-lg font-bold text-ink">{saved.name}</div>
-              <div className="text-label-sm text-ink-secondary">{saved.category} · {saved.location}</div>
+              <div className="text-label-sm text-ink-secondary">{joinMeta(saved.category, saved.location)}</div>
             </div>
           </div>
           {saved.description && (
@@ -255,41 +249,32 @@ export default function BoothCreate() {
           </div>
         </div>
 
-        {/* 위치 */}
-        <Field label="위치 (구역-번호)" error={errors.location} required hint="예: A-01, B-12">
-          <input
-            value={form.location}
-            onChange={(e) => setField('location', e.target.value)}
-            placeholder="A-01"
-            className={fieldInputClass(!!errors.location)}
-          />
-        </Field>
-
-        {/* 지도 위치 */}
+        {/* 부스 위치 (지도) */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <label className="text-label font-semibold text-ink-label">지도에서 위치 선택 (선택)</label>
-            {/* 백엔드는 좌표 생략 시 기존 값을 유지하므로, 이미 저장된 좌표는 지울 수 없고 다시 찍는 것만 가능 */}
-            {coords && !hasSavedCoords && (
-              <button
-                type="button"
-                onClick={() => setCoords(null)}
-                className="flex items-center gap-1 text-meta text-ink-secondary hover:text-ink"
-              >
-                <X size={11} /> 선택 취소
-              </button>
-            )}
-          </div>
+          <label className="text-label font-semibold text-ink-label">
+            부스 위치 <span className="text-[#DC2626]">*</span>
+          </label>
           <CampusMap
             markers={pickedMarker}
             center={coords ?? undefined}
             onMapClick={handlePickLocation}
-            className="h-[260px]"
+            className={`h-[260px] ${coordsError ? 'ring-2 ring-[#DC2626]' : ''}`}
           />
           <div className={`text-meta ${coordsError ? 'text-[#DC2626]' : 'text-ink-secondary'}`}>
-            {coordsError ?? (coords ? '선택한 위치가 부스 지도에 핀으로 표시돼요' : '지도를 눌러 부스 위치를 찍어주세요')}
+            {coordsError ?? (coords ? '선택한 위치가 부스 지도에 핀으로 표시돼요. 다시 누르면 옮겨져요' : '지도를 눌러 부스 위치를 찍어주세요')}
           </div>
         </div>
+
+        {/* 위치 설명 */}
+        <Field label="위치 설명 (선택)" error={errors.location} hint="손님이 현장에서 찾기 쉽게 적어주세요">
+          <input
+            value={form.location}
+            onChange={(e) => setField('location', e.target.value)}
+            placeholder="대양홀 앞 잔디, 학생회관 1층 입구 등"
+            maxLength={100}
+            className={fieldInputClass(!!errors.location)}
+          />
+        </Field>
 
         {/* 주최 기관 */}
         <Field label="주최 기관">

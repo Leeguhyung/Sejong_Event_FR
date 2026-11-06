@@ -6,6 +6,7 @@ import { useEventStore, type ActiveEvent } from '../../store/eventStore'
 import { useFestivalStore, type Booth } from '../../store/festivalStore'
 import { EMOJI_OPTIONS, BOOTH_CATEGORIES } from '../../data/constants'
 import { api } from '../../lib/api'
+import { joinMeta } from '../../types'
 
 type Tab = 'overview' | 'events' | 'booths' | 'applications' | 'accounts'
 
@@ -106,7 +107,7 @@ function BoothEditModal({ booth, onSave, onClose }: {
   const [form, setForm] = useState({
     name: booth.name,
     category: booth.category,
-    location: booth.location,
+    location: booth.location ?? '',
     emoji: booth.emoji,
     description: booth.description ?? '',
     organization: booth.organization ?? '',
@@ -119,7 +120,6 @@ function BoothEditModal({ booth, onSave, onClose }: {
   async function handleSave() {
     const errs: typeof errors = {}
     if (!form.name.trim()) errs.name = '부스명을 입력해주세요'
-    if (!form.location.trim()) errs.location = '위치를 입력해주세요'
     if (Object.keys(errs).length) { setErrors(errs); return }
     setSaving(true)
     try {
@@ -158,8 +158,8 @@ function BoothEditModal({ booth, onSave, onClose }: {
             ))}
           </div>
         </MField>
-        <MField label="위치" error={errors.location} required hint="예: A-01, B-12">
-          <input value={form.location} onChange={(e) => setF('location', e.target.value)} placeholder="A-01" className={mInput} />
+        <MField label="위치 설명 (선택)" error={errors.location}>
+          <input value={form.location} onChange={(e) => setF('location', e.target.value)} placeholder="대양홀 앞 잔디" maxLength={100} className={mInput} />
         </MField>
         <MField label="주최 기관">
           <input value={form.organization} onChange={(e) => setF('organization', e.target.value)} className={mInput} />
@@ -388,7 +388,7 @@ export default function AdminDashboard() {
                       <span className="text-2xl flex-none">{booth.emoji}</span>
                       <div className="flex-1 min-w-0">
                         <div className="text-body-sm font-bold text-ink mb-0.5">{booth.name}</div>
-                        <div className="text-label-sm text-ink-muted">{booth.category} · {booth.location}{booth.organization ? ` · ${booth.organization}` : ''}</div>
+                        <div className="text-label-sm text-ink-muted">{joinMeta(booth.category, booth.location, booth.organization)}</div>
                       </div>
                       <div className="flex items-center gap-2 flex-none">
                         <AdminBtn onClick={() => setEditBooth(booth)}>수정</AdminBtn>
@@ -419,7 +419,7 @@ export default function AdminDashboard() {
                         <span className="text-2xl flex-none">{booth.emoji}</span>
                         <div className="flex-1 min-w-0">
                           <div className="text-body-sm font-bold text-ink mb-0.5">{booth.name}</div>
-                          <div className="text-label-sm text-ink-muted">{booth.category} · {booth.location}</div>
+                          <div className="text-label-sm text-ink-muted">{joinMeta(booth.category, booth.location)}</div>
                           {booth.organization && <div className="text-label-sm text-ink-secondary mt-0.5">{booth.organization}</div>}
                           {booth.description && <div className="text-label-sm text-ink-muted mt-1 truncate">{booth.description}</div>}
                         </div>
@@ -441,7 +441,7 @@ export default function AdminDashboard() {
                           <span className="text-2xl flex-none">{booth.emoji}</span>
                           <div className="flex-1 min-w-0">
                             <div className="text-body-sm font-bold text-ink mb-0.5">{booth.name}</div>
-                            <div className="text-label-sm text-ink-muted">{booth.category} · {booth.location}{booth.organization ? ` · ${booth.organization}` : ''}</div>
+                            <div className="text-label-sm text-ink-muted">{joinMeta(booth.category, booth.location, booth.organization)}</div>
                           </div>
                           <div className="flex items-center gap-2 flex-none">
                             <AdminBtn onClick={() => approveBooth(booth.id).catch(() => {})}>재승인</AdminBtn>

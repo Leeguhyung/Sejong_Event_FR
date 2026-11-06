@@ -5,6 +5,7 @@ import { BackHeader } from '../../components/ui/BackHeader'
 import { LiveBadge } from '../../components/ui/LiveBadge'
 import { useAuthStore } from '../../store/authStore'
 import { useFestivalStore } from '../../store/festivalStore'
+import { joinMeta } from '../../types'
 
 export default function FestivalHub() {
   const navigate = useNavigate()
@@ -70,7 +71,7 @@ export default function FestivalHub() {
                 <span className="text-xl">{myBooth.emoji}</span>
                 <div>
                   <div className="text-body-sm font-bold text-ink">{myBooth.name}</div>
-                  <div className="text-meta text-ink-secondary">{myBooth.category} · {myBooth.location}</div>
+                  <div className="text-meta text-ink-secondary">{joinMeta(myBooth.category, myBooth.location)}</div>
                 </div>
                 <span className="ml-auto text-meta font-semibold px-2.5 py-1 rounded-lg bg-[#FEF3C7] text-[#92400E]">검토 중</span>
               </div>
@@ -86,7 +87,7 @@ export default function FestivalHub() {
               <span className="text-xl">{myBooth.emoji}</span>
               <div>
                 <div className="text-body-sm font-bold text-ink">{myBooth.name}</div>
-                <div className="text-meta text-ink-secondary">{myBooth.category} · {myBooth.location}</div>
+                <div className="text-meta text-ink-secondary">{joinMeta(myBooth.category, myBooth.location)}</div>
               </div>
               <span className="ml-auto text-meta font-semibold px-2.5 py-1 rounded-lg bg-[#FEE2E2] text-danger">거부됨</span>
             </div>

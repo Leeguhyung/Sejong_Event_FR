@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { CaretLeft, Confetti, Gear } from '@phosphor-icons/react'
 import { Button } from '../../components/ui/Button'
 import { api } from '../../lib/api'
+import { joinMeta } from '../../types'
 
 type KioskStep = 'input' | 'confirmed'
 
@@ -12,7 +13,7 @@ interface BoothInfo {
   id: number
   name: string
   emoji: string
-  location: string
+  location?: string | null
   waiting: number
   isOpen: boolean
 }
@@ -136,7 +137,7 @@ export default function Kiosk() {
           </div>
           <div>
             <div className="text-sm font-bold text-ink">{booth.name}</div>
-            <div className="text-meta text-ink-secondary">{booth.location} · 현재 {waitingCount}팀 대기</div>
+            <div className="text-meta text-ink-secondary">{joinMeta(booth.location, `현재 ${waitingCount}팀 대기`)}</div>
           </div>
         </div>
       )}

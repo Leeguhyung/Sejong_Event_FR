@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CaretLeft, Storefront, MapPin } from '@phosphor-icons/react'
-import { getCongestionLevel, getCongestionColor, maskName } from '../../types'
+import { getCongestionLevel, getCongestionColor, maskName, joinMeta } from '../../types'
 import { api } from '../../lib/api'
 import { CampusMap, type CampusMapMarker } from '../../components/map/CampusMap'
 import { hasCoordinates } from '../../lib/campus'
@@ -10,7 +10,7 @@ interface BoothInfo {
   id: number
   name: string
   category: string
-  location: string
+  location?: string | null
   latitude?: number | null
   longitude?: number | null
   emoji: string
@@ -112,7 +112,7 @@ export default function BoothDetail() {
           </span>
         </div>
         <div className="text-label text-ink-secondary mb-4">
-          {booth.category} · {booth.location}
+          {joinMeta(booth.category, booth.location)}
         </div>
 
         {/* 웨이팅 현황 */}
