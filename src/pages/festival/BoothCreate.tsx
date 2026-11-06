@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, Lightbulb, ClipboardText, HourglassMedium } from '@phosphor-icons/react'
+import { Check, Lightbulb, ClipboardText, HourglassMedium, X } from '@phosphor-icons/react'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { useAuthStore } from '../../store/authStore'
 import { useFestivalStore, type Booth } from '../../store/festivalStore'
 import { EMOJI_OPTIONS, BOOTH_CATEGORIES } from '../../data/constants'
 import { api } from '../../lib/api'
 import { Field, fieldInputClass } from '../../components/ui/Field'
+import { CampusMap, type CampusMapMarker } from '../../components/map/CampusMap'
+import { isInsideCampus } from '../../lib/campus'
+import type { LatLng } from '../../data/campusMap'
 
 interface FormData {
   name: string
@@ -32,6 +35,13 @@ export default function BoothCreate() {
     emoji: editTarget?.emoji ?? '🍢',
     description: editTarget?.description ?? '',
   })
+  const [coords, setCoords] = useState<LatLng | null>(
+    editTarget?.latitude != null && editTarget?.longitude != null
+      ? { lat: editTarget.latitude, lng: editTarget.longitude }
+      : null,
+  )
+  const hasSavedCoords = editTarget?.latitude != null && editTarget?.longitude != null
+  const [coordsError, setCoordsError] = useState<string>()
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState<Booth | null>(null)
@@ -40,6 +50,21 @@ export default function BoothCreate() {
     setForm((f) => ({ ...f, [key]: value }))
     setErrors((e) => ({ ...e, [key]: undefined }))
   }
+
+  function handlePickLocation(position: LatLng) {
+    if (!isInsideCampus(position)) {
+      setCoordsError('캠퍼스 안쪽을 눌러주세요')
+      return
+    }
+    setCoordsError(undefined)
+    setCoords(position)
+  }
+
+  const pickedMarker = useMemo<CampusMapMarker[]>(
+    () => (coords ? [{ id: 'picked', position: coords, emoji: form.emoji, color: 'var(--color-primary)' }] : []),
+    [coords, form.emoji],
+  )
+  const coordsPayload = coords ? { latitude: coords.lat, longitude: coords.lng } : {}
 
   function validate() {
     const errs: typeof errors = {}
@@ -62,6 +87,7 @@ export default function BoothCreate() {
           location: form.location.trim(),
           emoji: form.emoji,
           description: form.description.trim() || undefined,
+          ...coordsPayload,
         })
         setSaved({ ...editTarget, ...form })
       } else {
@@ -71,6 +97,7 @@ export default function BoothCreate() {
           location: form.location.trim(),
           emoji: form.emoji,
           description: form.description.trim() || undefined,
+          ...coordsPayload,
         })
         const newBooth: Booth = res.data.data
         await fetchBooths()
@@ -237,6 +264,32 @@ export default function BoothCreate() {
             className={fieldInputClass(!!errors.location)}
           />
         </Field>
+
+        {/* 지도 위치 */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <label className="text-label font-semibold text-ink-label">지도에서 위치 선택 (선택)</label>
+            {/* 백엔드는 좌표 생략 시 기존 값을 유지하므로, 이미 저장된 좌표는 지울 수 없고 다시 찍는 것만 가능 */}
+            {coords && !hasSavedCoords && (
+              <button
+                type="button"
+                onClick={() => setCoords(null)}
+                className="flex items-center gap-1 text-meta text-ink-secondary hover:text-ink"
+              >
+                <X size={11} /> 선택 취소
+              </button>
+            )}
+          </div>
+          <CampusMap
+            markers={pickedMarker}
+            center={coords ?? undefined}
+            onMapClick={handlePickLocation}
+            className="h-[260px]"
+          />
+          <div className={`text-meta ${coordsError ? 'text-[#DC2626]' : 'text-ink-secondary'}`}>
+            {coordsError ?? (coords ? '선택한 위치가 부스 지도에 핀으로 표시돼요' : '지도를 눌러 부스 위치를 찍어주세요')}
+          </div>
+        </div>
 
         {/* 주최 기관 */}
         <Field label="주최 기관">

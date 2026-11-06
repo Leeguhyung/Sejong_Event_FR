@@ -1,13 +1,16 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MagnifyingGlass, Plus, Storefront, MapPin } from '@phosphor-icons/react'
+import { MagnifyingGlass, Plus, Storefront, MapPin, ListBullets, MapTrifold } from '@phosphor-icons/react'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { LiveBadge } from '../../components/ui/LiveBadge'
+import { CampusMap, type CampusMapMarker } from '../../components/map/CampusMap'
 import { getCongestionLevel, getCongestionColor } from '../../types'
+import { hasCoordinates } from '../../lib/campus'
 import { useAuthStore } from '../../store/authStore'
 import { useFestivalStore } from '../../store/festivalStore'
 
 const CATEGORIES = ['전체', '주점', '체험']
+type ViewMode = 'list' | 'map'
 
 export default function BoothList() {
   const navigate = useNavigate()
@@ -17,6 +20,7 @@ export default function BoothList() {
 
   useEffect(() => { fetchBooths() }, [])
   const [query, setQuery] = useState('')
+  const [view, setView] = useState<ViewMode>('list')
 
   const approved = useMemo(
     () => booths.filter((b) => b.status === 'approved'),
@@ -33,6 +37,19 @@ export default function BoothList() {
         .sort((a, b) => b.waiting - a.waiting), // 대기 많은 순
     [approved, selectedCat, query],
   )
+  const mapMarkers = useMemo<CampusMapMarker[]>(
+    () =>
+      filtered.filter(hasCoordinates).map((b) => ({
+        id: b.id,
+        position: { lat: b.latitude, lng: b.longitude },
+        emoji: b.emoji,
+        color: getCongestionColor(getCongestionLevel(b.waiting)).dot,
+        label: `${b.name} · ${b.waiting}명`,
+        onClick: () => navigate(`/festival/booths/${b.id}`),
+      })),
+    [filtered, navigate],
+  )
+  const unplacedCount = filtered.length - mapMarkers.length
 
   return (
     <div className="flex flex-col flex-1 px-7 pt-4 pb-7 overflow-y-auto">
@@ -52,8 +69,9 @@ export default function BoothList() {
         />
       </div>
 
-      {/* 카테고리 탭 */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-0.5 scrollbar-hide">
+      {/* 카테고리 탭 + 목록/지도 전환 */}
+      <div className="flex items-center gap-2 mb-4">
+      <div className="flex flex-1 gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
@@ -65,6 +83,26 @@ export default function BoothList() {
             {cat === '전체' ? `전체 ${approved.length}` : cat}
           </button>
         ))}
+      </div>
+        <div className="flex flex-none bg-card rounded-lg p-0.5" role="tablist" aria-label="보기 방식">
+          {([
+            ['list', '목록', ListBullets],
+            ['map', '지도', MapTrifold],
+          ] as const).map(([mode, label, Icon]) => (
+            <button
+              key={mode}
+              role="tab"
+              aria-selected={view === mode}
+              onClick={() => setView(mode)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                view === mode ? 'bg-white text-ink shadow-sm' : 'text-ink-label'
+              }`}
+            >
+              <Icon size={13} />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 운영진 전용: 부스 추가 버튼 */}
@@ -83,8 +121,18 @@ export default function BoothList() {
         </button>
       )}
 
+      {view === 'map' && (
+        <div className="flex flex-col gap-2 mb-4">
+          <CampusMap markers={mapMarkers} className="h-[420px]" />
+          <div className="flex items-center justify-between text-meta text-ink-secondary px-1">
+            <span>핀 색상: 초록 여유 · 노랑 보통 · 빨강 혼잡</span>
+            {unplacedCount > 0 && <span>위치 미등록 {unplacedCount}개</span>}
+          </div>
+        </div>
+      )}
+
       {/* 부스 목록 — 혼잡도 색상 점 + 대기 인원, 탭하면 부스 상세로 */}
-      <div className="flex flex-col gap-4">
+      <div className={`flex flex-col gap-4 ${view === 'map' ? 'hidden' : ''}`}>
         {filtered.map((booth) => {
           const level = getCongestionLevel(booth.waiting)
           const c = getCongestionColor(level)
@@ -115,7 +163,7 @@ export default function BoothList() {
         })}
       </div>
 
-      {filtered.length === 0 && (
+      {view === 'list' && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center flex-1 gap-2 py-16 text-center">
           <Storefront size={40} color="var(--color-ink-muted)" />
           <div className="text-sm font-semibold text-ink">부스가 없어요</div>

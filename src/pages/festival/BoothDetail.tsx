@@ -1,14 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CaretLeft, Storefront, MapPin } from '@phosphor-icons/react'
 import { getCongestionLevel, getCongestionColor, maskName } from '../../types'
 import { api } from '../../lib/api'
+import { CampusMap, type CampusMapMarker } from '../../components/map/CampusMap'
+import { hasCoordinates } from '../../lib/campus'
 
 interface BoothInfo {
   id: number
   name: string
   category: string
   location: string
+  latitude?: number | null
+  longitude?: number | null
   emoji: string
   gradient: string
   waiting: number
@@ -30,6 +34,16 @@ export default function BoothDetail() {
   const [queue, setQueue] = useState<QueueItem[]>([])
   const [search, setSearch] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const locationMarker = useMemo<CampusMapMarker[] | null>(() => {
+    if (!booth || !hasCoordinates(booth)) return null
+    return [{
+      id: booth.id,
+      position: { lat: booth.latitude, lng: booth.longitude },
+      emoji: booth.emoji,
+      color: getCongestionColor(getCongestionLevel(booth.waiting)).dot,
+    }]
+  }, [booth?.id, booth?.latitude, booth?.longitude, booth?.emoji, booth?.waiting])
 
   const fetchAll = useCallback(() => {
     if (!id) return
@@ -179,6 +193,18 @@ export default function BoothDetail() {
             </div>
           )}
         </div>
+
+        {/* 부스 위치 */}
+        {locationMarker && (
+          <div className="bg-card rounded-2xl px-4 py-4 mb-4">
+            <div className="text-label font-bold text-ink mb-2.5">부스 위치</div>
+            <CampusMap
+              markers={locationMarker}
+              center={locationMarker[0].position}
+              className="h-[200px] bg-white"
+            />
+          </div>
+        )}
 
         {/* 부스 소개 */}
         {booth.description && (
