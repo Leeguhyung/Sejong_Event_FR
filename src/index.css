@@ -27,3 +27,40 @@
     @apply min-h-svh;
   }
 }
+
+/* 카카오맵 CustomOverlay 안의 핀 — React 밖 DOM 이라 전역 클래스로 스타일링 */
+.campus-map-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: translateY(-2px);
+}
+.campus-map-pin__bubble {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: 3px solid var(--pin-color);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.35);
+}
+.campus-map-pin__label {
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(17, 24, 39, 0.82);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}

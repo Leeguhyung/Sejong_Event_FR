@@ -1,14 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CaretLeft, Storefront, MapPin } from '@phosphor-icons/react'
-import { getCongestionLevel, getCongestionColor } from '../../types'
+import { getCongestionLevel, getCongestionColor, maskName, joinMeta } from '../../types'
 import { api } from '../../lib/api'
+import { CampusMap, type CampusMapMarker } from '../../components/map/CampusMap'
+import { hasCoordinates } from '../../lib/campus'
 
 interface BoothInfo {
   id: number
   name: string
   category: string
-  location: string
+  location?: string | null
+  latitude?: number | null
+  longitude?: number | null
   emoji: string
   gradient: string
   waiting: number
@@ -19,6 +23,7 @@ interface BoothInfo {
 interface QueueItem {
   order: number
   name: string
+  phoneTail?: string
   partySize: number
 }
 
@@ -29,6 +34,16 @@ export default function BoothDetail() {
   const [queue, setQueue] = useState<QueueItem[]>([])
   const [search, setSearch] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const locationMarker = useMemo<CampusMapMarker[] | null>(() => {
+    if (!booth || !hasCoordinates(booth)) return null
+    return [{
+      id: booth.id,
+      position: { lat: booth.latitude, lng: booth.longitude },
+      emoji: booth.emoji,
+      color: getCongestionColor(getCongestionLevel(booth.waiting)).dot,
+    }]
+  }, [booth?.id, booth?.latitude, booth?.longitude, booth?.emoji, booth?.waiting])
 
   const fetchAll = useCallback(() => {
     if (!id) return
@@ -56,8 +71,16 @@ export default function BoothDetail() {
   const level = getCongestionLevel(booth.waiting)
   const c = getCongestionColor(level)
 
+  // 화면에는 마스킹된 이름만 보이므로 부분 문자열 검색 대신
+  // 실명 전체를 마스킹한 모양이 같은지, 또는 전화번호 뒷자리 4자리가 같은지로 찾는다.
+  function matchesSearch(item: QueueItem, query: string) {
+    const digits = query.replace(/\D/g, '')
+    if (digits.length >= 4) return item.phoneTail === digits.slice(-4)
+    return maskName(query) === maskName(item.name)
+  }
+
   const myItem = search.trim()
-    ? queue.find((q) => q.name.includes(search.trim()))
+    ? queue.find((q) => matchesSearch(q, search.trim()))
     : null
 
   return (
@@ -89,7 +112,7 @@ export default function BoothDetail() {
           </span>
         </div>
         <div className="text-label text-ink-secondary mb-4">
-          {booth.category} · {booth.location}
+          {joinMeta(booth.category, booth.location)}
         </div>
 
         {/* 웨이팅 현황 */}
@@ -115,7 +138,7 @@ export default function BoothDetail() {
               ref={inputRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="이름을 입력하세요"
+              placeholder="이름 또는 전화번호 뒷자리 4자리"
               className="w-full h-11 bg-white rounded-xl px-4 pr-10 text-body-sm text-ink outline-none focus:ring-2 focus:ring-primary/30 border border-border"
             />
             {search && (
@@ -147,7 +170,7 @@ export default function BoothDetail() {
           ) : (
             <div className="flex flex-col gap-2">
               {queue.map((item) => {
-                const isMe = search.trim() && item.name.includes(search.trim())
+                const isMe = Boolean(search.trim() && matchesSearch(item, search.trim()))
                 return (
                   <div
                     key={item.order}
@@ -157,7 +180,10 @@ export default function BoothDetail() {
                       {item.order}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className={`text-body-sm font-semibold ${isMe ? 'text-primary' : 'text-ink'}`}>{item.name}</span>
+                      <span className={`text-body-sm font-semibold ${isMe ? 'text-primary' : 'text-ink'}`}>
+                        {maskName(item.name)}
+                        {item.phoneTail && <span className="text-ink-muted font-normal"> {item.phoneTail}</span>}
+                      </span>
                       <span className="text-label-sm text-ink-muted ml-1.5">{item.partySize}명</span>
                     </div>
                     {isMe && <span className="text-meta text-primary font-bold">나</span>}
@@ -167,6 +193,18 @@ export default function BoothDetail() {
             </div>
           )}
         </div>
+
+        {/* 부스 위치 */}
+        {locationMarker && (
+          <div className="bg-card rounded-2xl px-4 py-4 mb-4">
+            <div className="text-label font-bold text-ink mb-2.5">부스 위치</div>
+            <CampusMap
+              markers={locationMarker}
+              center={locationMarker[0].position}
+              className="h-[200px] bg-white"
+            />
+          </div>
+        )}
 
         {/* 부스 소개 */}
         {booth.description && (

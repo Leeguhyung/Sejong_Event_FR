@@ -5,7 +5,9 @@ export interface Booth {
   id: number
   name: string
   category: string
-  location: string
+  location?: string | null
+  latitude?: number | null
+  longitude?: number | null
   emoji: string
   gradient: string
   waiting: number
